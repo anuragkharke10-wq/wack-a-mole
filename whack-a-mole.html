@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Whack a Mole</title>
+  <style>
+    body {
+      background-color: lightgreen;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      color: brown;
+      font-size: 40px;
+    }
+
+    #score-area {
+      font-size: 22px;
+      margin: 10px;
+    }
+
+    #timer {
+      font-size: 22px;
+      color: red;
+      margin: 10px;
+    }
+
+    #grid {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 15px;
+      margin: 20px auto;
+    }
+
+    .hole {
+      width: 100px;
+      height: 100px;
+      background-color: brown;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      cursor: pointer;
+      border: 4px solid saddlebrown;
+    }
+
+    .hole:hover {
+      background-color: peru;
+    }
+
+    button {
+      font-size: 20px;
+      padding: 10px 30px;
+      background-color: orange;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: darkorange;
+    }
+
+    #message {
+      font-size: 24px;
+      color: darkgreen;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔨 Whack a Mole!</h1>
+
+  <div id="score-area">Score: <b id="score">0</b> &nbsp;&nbsp; Best: <b id="best">0</b></div>
+  <div id="timer">Time: 30</div>
+  <div id="message">Press Start to play!</div>
+
+  <div id="grid">
+    <div class="hole" id="h0"></div>
+    <div class="hole" id="h1"></div>
+    <div class="hole" id="h2"></div>
+    <div class="hole" id="h3"></div>
+    <div class="hole" id="h4"></div>
+    <div class="hole" id="h5"></div>
+    <div class="hole" id="h6"></div>
+    <div class="hole" id="h7"></div>
+    <div class="hole" id="h8"></div>
+  </div>
+
+  <button onclick="startGame()">Start Game</button>
+
+  <script>
+    var score = 0;
+    var best = 0;
+    var timeLeft = 30;
+    var moleIndex = -1;
+    var gameRunning = false;
+    var moleTimer;
+    var countdownTimer;
+
+    var holes = document.querySelectorAll(".hole");
+
+    holes.forEach(function(hole) {
+      hole.addEventListener("click", function() {
+        if (!gameRunning) return;
+
+        var id = hole.id;
+        var index = parseInt(id.replace("h", ""));
+
+        if (index === moleIndex) {
+          score++;
+          document.getElementById("score").innerText = score;
+          hole.innerText = "💥";
+          setTimeout(function() {
+            hole.innerText = "";
+          }, 200);
+          showMole();
+        }
+      });
+    });
+
+    function showMole() {
+      // hide old mole
+      if (moleIndex !== -1) {
+        document.getElementById("h" + moleIndex).innerText = "";
+      }
+
+      // pick random hole
+      var next = Math.floor(Math.random() * 9);
+      moleIndex = next;
+      document.getElementById("h" + moleIndex).innerText = "🐭";
+
+      clearTimeout(moleTimer);
+      moleTimer = setTimeout(showMole, 800);
+    }
+
+    function startGame() {
+      if (gameRunning) return;
+
+      gameRunning = true;
+      score = 0;
+      timeLeft = 30;
+
+      document.getElementById("score").innerText = 0;
+      document.getElementById("timer").innerText = "Time: 30";
+      document.getElementById("message").innerText = "Whack the mole!";
+
+      showMole();
+
+      countdownTimer = setInterval(function() {
+        timeLeft--;
+        document.getElementById("timer").innerText = "Time: " + timeLeft;
+
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      clearTimeout(moleTimer);
+      clearInterval(countdownTimer);
+
+      // hide mole
+      if (moleIndex !== -1) {
+        document.getElementById("h" + moleIndex).innerText = "";
+        moleIndex = -1;
+      }
+
+      if (score > best) {
+        best = score;
+        document.getElementById("best").innerText = best;
+        document.getElementById("message").innerText = "Game Over! Score: " + score + " 🎉 New Best!";
+      } else {
+        document.getElementById("message").innerText = "Game Over! Score: " + score;
+      }
+
+      document.getElementById("timer").innerText = "Time: 0";
+    }
+  </script>
+
+</body>
+</html>
